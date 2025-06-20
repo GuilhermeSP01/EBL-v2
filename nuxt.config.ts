@@ -2,9 +2,11 @@
 export default defineNuxtConfig({
   compatibilityDate: '2025-05-15',
   devtools: { enabled: true },
-  plugins: [
-    { src: '~/plugins/firebase.client.js', mode: 'client' }
-  ],
+
+  modules: ['nuxt-mongoose'],
+
+  plugins: [{ src: '~/plugins/firebase.client.js', mode: 'client' }],
+
   runtimeConfig: {
     public: {
       firebase: {
