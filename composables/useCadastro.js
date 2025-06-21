@@ -1,6 +1,6 @@
 import { getAuth } from "firebase/auth";
 
-const getToken = async () => {
+export const getToken = async () => {
     const auth = getAuth();
     const user = auth.currentUser;
     if (!user) return null;
@@ -30,7 +30,7 @@ export function useCadastro() {
         const stored = localStorage.getItem('cadastro');
         const timestamp = localStorage.getItem('cadastroTimestamp');
 
-        if (stored && timestamp && Date.now() - Number(timestamp) < 1000 * 60 * 60 * 24) {
+        if (stored && timestamp && Date.now() - Number(timestamp) < 1000 * 60 * 10) {
             try {
                 const parsed = JSON.parse(stored);
                 if (parsed.email === user?.email) {

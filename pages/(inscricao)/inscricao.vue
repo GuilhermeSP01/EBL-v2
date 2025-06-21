@@ -25,8 +25,7 @@
             <p> As inscrições estão abertas para a turma {{ turmas[0].nome }}
                 até {{ turmas[0].dataFechamento }} </p>
             <p> Complete sua inscrição para participar! </p>
-            
-            <!-- Formulário para inscrição -->
+
             <FormInscricao :turma="turmas[0]" />
         </div>
     </div>

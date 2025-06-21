@@ -16,6 +16,7 @@ export const Questao = {
 
 export const Aula = defineMongooseModel('Aula', {
     turmaId: {type: 'string', required: true},
+    numero: {type: 'number', required: true},
     titulo: {type: 'string', required: true},
     dataAbertura: {type: 'date', required: true},
     dataFechamento: {type: 'date', required: true},

@@ -14,8 +14,5 @@ export const Envio = defineMongooseModel('Envio', {
 }, {
 
 }, (schema) => {
-    schema.pre('save', function(next) {
-        this.dataEnvio = new Date();
-        next();
-    });
+    
 });

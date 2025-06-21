@@ -1,8 +1,7 @@
 <script setup>
     definePageMeta({ middleware: ['auth', 'cadastro'] });
-    const { isAuthLoading, logout } = useAuth();
+    const { isAuthLoading } = useAuth();
     const { aulas, loadAulas } = useAulas();
-    const { $auth } = useNuxtApp();
 
     onMounted(() => {
         loadAulas();
@@ -14,9 +13,6 @@
     <div v-else>
         <Header />
         <h1> Aulas </h1>
-        <p> Página onde o aluno irá encontrar as aulas </p>
-        <button @click="logout"> Logout </button>
-        <p> token: {{ $auth.currentUser.accessToken }} </p>
 
         <div v-if="aulas.length === 0">
             <p> Ainda não há nenhuma aula disponível. </p>
@@ -24,7 +20,12 @@
         <div v-else>
             <ul>
                 <li v-for="aula in aulas">
-                    {{ aula.titulo }}, {{ aula.linkMaterial }}, {{ aula.linkVideo }}
+                    <p> Aula {{ aula.numero }} - {{ aula.titulo }} </p>
+                    <p> Data de abertura: {{ aula.dataAbertura }} </p>
+                    <p> Data de fechamento: {{ aula.dataFechamento }} </p>
+                    <NuxtLink :to="`/atividade/${aula.numero}`"> Questionário </NuxtLink> 
+                    <NuxtLink :to="`${aula.linkVideo}`"> Vídeo-aula </NuxtLink>
+                    <NuxtLink :to="`${aula.linkMaterial}`"> Material </NuxtLink>
                 </li>
             </ul>
         </div>
