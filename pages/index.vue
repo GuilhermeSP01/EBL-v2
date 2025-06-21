@@ -2,9 +2,12 @@
     const { $auth } = useNuxtApp();
     const showAuthCard = ref(false);
 
-    const handleLogin = () => {
-        if ($auth.currentUser) navigateTo('/aulas');
-        else showAuthCard.value = true;
+    const handleLogin = async () => {
+        if ($auth.currentUser) {
+            navigateTo('/aulas');
+        } else {
+            showAuthCard.value = true;
+        };
     }
 </script>
 

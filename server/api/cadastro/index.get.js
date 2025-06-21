@@ -13,5 +13,5 @@ export default defineEventHandler(async (event) => {
         statusMessage: 'Token inválido' 
     });
 
-    return await Cadastro.find({ email: user.email });
+    return await Cadastro.findOne({ email: user.email });
 });
