@@ -1,24 +1,53 @@
 <script setup>
-    import { useAuth } from '~~/composables/useAuth';
-    const { register, error } = useAuth();
+  import { useAuth } from '~~/composables/useAuth';
+  const { register, error } = useAuth();
 
-    const emitLoginForm = defineEmits(['loginForm']);
-    const emailRegister = ref('');
-    const passwordRegister = ref('');
-    const confirmPassword = ref('');
+  const emitLoginForm = defineEmits(['loginForm']);
+  const emailRegister = ref('');
+  const passwordRegister = ref('');
+  const confirmPassword = ref('');
 </script>
 
 <template>
-    <h1> Register Form </h1>
-    <p> {{ error }} </p>
+  <div class="space-y-6">
+    <h1 class="text-2xl font-bold text-blue-900 mb-4">Cadastro</h1>
+    <p v-if="error" class="text-red-500 text-sm mb-4">{{ error }}</p>
 
-    <input type="email" placeholder="Email" v-model="emailRegister" />
-    <input type="password" placeholder="Password" v-model="passwordRegister" />
-    <input type="password" placeholder="Confirm Password" v-model="confirmPassword" />
-    <button @click="register(emailRegister, passwordRegister, confirmPassword)"> Cadastrar </button>
-
-    <div>
-        <p> Ja tem uma conta? </p>
-        <button @click="emitLoginForm('loginForm')"> Login </button>
+    <div class="space-y-4">
+      <input
+        type="email"
+        placeholder="Email"
+        v-model="emailRegister"
+        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
+      />
+      <input
+        type="password"
+        placeholder="Senha"
+        v-model="passwordRegister"
+        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
+      />
+      <input
+        type="password"
+        placeholder="Confirme sua senha"
+        v-model="confirmPassword"
+        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
+      />
+      <button
+        @click="register(emailRegister, passwordRegister, confirmPassword)"
+        class="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-800 font-semibold px-4 py-2 rounded-lg transition-colors"
+      >
+        Cadastrar
+      </button>
     </div>
+
+    <div class="text-center mt-6">
+      <p class="text-gray-600">Já tem uma conta?</p>
+      <button
+        @click="emitLoginForm('loginForm')"
+        class="mt-2 text-blue-600 hover:text-yellow-600 font-medium"
+      >
+        Faça login
+      </button>
+    </div>
+  </div>
 </template>

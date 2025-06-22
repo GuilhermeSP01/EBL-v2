@@ -1,4 +1,7 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+
+import tailwindcss from "@tailwindcss/vite"
+
 export default defineNuxtConfig({
   compatibilityDate: '2025-05-15',
   devtools: { enabled: true },
@@ -6,6 +9,12 @@ export default defineNuxtConfig({
   modules: ['nuxt-mongoose'],
 
   plugins: [{ src: '~/plugins/firebase.client.js', mode: 'client' }],
+
+  css: ['~/assets/css/main.css'],
+  
+  vite: {
+    plugins: [tailwindcss()]
+  },
 
   runtimeConfig: {
     public: {
