@@ -25,3 +25,4 @@ logs
 
 # Keys
 serviceAccountKey.json
+dev.serviceAccountKey.json

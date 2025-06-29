@@ -44,6 +44,6 @@ export default defineEventHandler(async (event) => {
     
     return {
         ...cadastro.toObject(),
-        envios: enviosComCorrecao
+        envios: enviosComCorrecao ?? []
     };
 });

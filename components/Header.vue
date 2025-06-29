@@ -10,7 +10,7 @@
   <header class="bg-[#00105C] text-white px-6 py-4">
     <div class="mx-auto flex justify-between items-center">
       <div class="flex items-center">
-        <span class="text-xl font-bold">Escola da Bíblia</span>
+        <NuxtLink to="/aulas" class="text-xl font-bold">Portal do Aluno</NuxtLink>
       </div>
       <ul class="flex gap-6">
         <li v-for="item in navItems" :key="item.name">

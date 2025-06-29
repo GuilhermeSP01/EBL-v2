@@ -133,7 +133,7 @@
                     v-model="respostas[index].resposta"
                     class="w-4 h-4"
                   />
-                  <span>{{ alternativa.numero }}. {{ alternativa.descricao }}</span>
+                  <span>{{ String.fromCharCode(96 + alternativa.numero) }}. {{ alternativa.descricao }}</span>
                 </label>
               </div>
             </div>
