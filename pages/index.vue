@@ -50,7 +50,7 @@
             </button>
         </div>
 
-        <div class="w-1/2 min-h-screen bg-[url('/website/facebook2c.png')] bg-cover bg-center" style="background-position: 30% center;">
+        <div class="w-1/2 min-h-screen bg-[url('/background/facebook2c.png')] bg-cover bg-center" style="background-position: 30% center;">
             <!-- Imagem -->
         </div>
     </main>
@@ -58,7 +58,7 @@
 
 
     <section id="sobre" class="flex min-h-screen w-full bg-gradient-to-r from-blue-900 to-[#00105C]">
-        <div class="w-1/2 min-h-screen bg-[url('/website/facebook4c.png')] bg-cover bg-center" style="background-position: 100% center;">
+        <div class="w-1/2 min-h-screen bg-[url('/background/facebook4c.png')] bg-cover bg-center" style="background-position: 100% center;">
             <!-- Imagem -->
         </div>
 
@@ -150,7 +150,7 @@
 
 
     <section id="depoimentos" class="hidden flex min-h-screen w-full bg-gradient-to-r from-blue-900 to-[#00105C]">
-        <div class="w-1/2 min-h-screen bg-[url('/website/facebook1c.png')] bg-cover bg-center" style="background-position: 100% center;">
+        <div class="w-1/2 min-h-screen bg-[url('/background/facebook1c.png')] bg-cover bg-center" style="background-position: 100% center;">
             <!-- Imagem -->
         </div>
 
