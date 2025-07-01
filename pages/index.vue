@@ -37,7 +37,7 @@
 
     <main id="inicio" class="flex min-h-screen w-full bg-gradient-to-r from-blue-900 to-[#00105C]">
         <div class="w-1/2 flex flex-col justify-center items-center">
-            <h2 class="text-4xl text-white font-extrabold tracking-wide mb-4"> Bem-vindo! </h2>
+            <h2 class="text-4xl text-white font-extrabold tracking-wide mb-4"> Bem vindo! </h2>
 
             <h3 class="text-2xl font-semibold text-blue-100"> Turma 2 - 2025 </h3>
             <p class="text-lg text-blue-200 mb-6"> As inscrições estão abertas! </p>

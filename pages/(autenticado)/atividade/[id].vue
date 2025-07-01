@@ -89,7 +89,7 @@
         <!-- Se já houve envio, exibe as respostas -->
         <div v-if="envioParaAula" class="mt-6 space-y-6">
           <p class="text-sm text-gray-500">
-            <strong>Seu questionário já foi enviado.</strong> Data do envio: {{ envioParaAula.dataEnvio }}
+            <strong>Seu questionário já foi enviado.</strong> Data do envio: {{ new Date(envioParaAula.dataEnvio).toLocaleDateString('pt-BR') }}
           </p>
           <div v-for="questao in aula.questoes" :key="questao.numero" class="space-y-2">
             <h3 class="font-semibold">Questão {{ questao.numero }}</h3>
