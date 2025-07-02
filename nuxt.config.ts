@@ -16,6 +16,15 @@ export default defineNuxtConfig({
     plugins: [tailwindcss()]
   },
 
+  mongoose: {
+    options: {
+      maxPoolSize: 5,
+      minPoolSize: 0,
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
+    }
+  },
+
   runtimeConfig: {
     public: {
       firebase: {
