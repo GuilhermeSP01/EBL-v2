@@ -56,8 +56,8 @@ const reprovações = computed(() => {
   <div v-else class="space-y-8 px-6 py-8">
   <section class="space-y-4 max-w-6xl mx-auto">
     <div class="flex items-center justify-between">
-      <h1 class="text-2xl font-semibold px-4 pt-0.5">Aulas</h1>
-      <div class="flex items-center gap-4">
+      <h1 v-if="aulas.length" class="text-2xl font-semibold px-4 pt-0.5">Aulas</h1>
+      <div v-if="aulas.length" class="flex items-center gap-4">
         <div class="flex items-center gap-2">
           <span class="segoe-ui text-2xl font-medium text-green-600">{{ aprovações }}</span>
           <span class="segoe-ui text-lg text-gray-600">{{ aprovações === 1 ? 'aprovação' : 'aprovações' }}</span>
@@ -73,9 +73,22 @@ const reprovações = computed(() => {
 
       </div>
 
-    <div v-if="aulas.length === 0" class="bg-white p-6 rounded-lg shadow">
-      <p class="text-gray-600">Ainda não há aulas disponíveis.</p>
-    </div>
+    <div v-if="aulas.length === 0" class="bg-white p-6 rounded-lg shadow flex flex-col items-center space-y-4">
+  <p class="text-gray-600 text-center">
+    <strong>Parabéns, você se inscreveu com sucesso!</strong><br>
+    Agora só precisa aguardar o início das aulas, em <strong>02/Agosto, às 15h00</strong>.<br>
+    Até breve!
+  </p>
+  <a
+    href="https://chat.whatsapp.com/GFtj5ZtDu8OEGpHRjoFv9m?mode=r_t"
+    target="_blank"
+    rel="noopener"
+    class="inline-block px-6 py-3 bg-green-600 text-white font-semibold rounded-lg shadow hover:bg-green-700 transition"
+  >
+    Entrar no grupo do WhatsApp
+  </a>
+</div>
+
 
     <div v-else class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       <div v-for="aula in [...aulas].sort((a, b) => b.numero - a.numero)" :key="aula.numero" class="space-y-2">
