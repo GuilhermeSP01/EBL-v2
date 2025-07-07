@@ -29,7 +29,7 @@
 const aprovações = computed(() => {
   if (!cadastro || !cadastro.envios) return 0;
   return aulas.value.filter(aula => {
-    const envio = cadastro.envios.find(envio => envio.aulaId === aula._id);
+    const envio = cadastro.envios.find(envio => envio.aulaId === aula.id);
     return envio && envio.questoes.filter(q => q.correta).length >= 2;
   }).length;
 });
@@ -37,7 +37,7 @@ const aprovações = computed(() => {
 const reprovações = computed(() => {
   if (!cadastro || !cadastro.envios) return 0;
   return aulas.value.filter(aula => {
-    const envio = cadastro.value.envios.find(envio => envio.aulaId === aula._id);
+    const envio = cadastro.value.envios.find(envio => envio.aulaId === aula.id);
     if (envio) {
       return envio.questoes.filter(q => q.correta).length < 2;
     } else {
@@ -56,8 +56,8 @@ const reprovações = computed(() => {
   <div v-else class="space-y-8 px-6 py-8">
   <section class="space-y-4 max-w-6xl mx-auto">
     <div class="flex items-center justify-between">
-      <h1 v-if="aulas.length" class="text-2xl font-semibold px-4 pt-0.5">Aulas</h1>
-      <div v-if="aulas.length" class="flex items-center gap-4">
+      <h1 class="text-2xl font-semibold px-4 pt-0.5">Aulas</h1>
+      <div class="flex items-center gap-4">
         <div class="flex items-center gap-2">
           <span class="segoe-ui text-2xl font-medium text-green-600">{{ aprovações }}</span>
           <span class="segoe-ui text-lg text-gray-600">{{ aprovações === 1 ? 'aprovação' : 'aprovações' }}</span>
@@ -73,22 +73,9 @@ const reprovações = computed(() => {
 
       </div>
 
-    <div v-if="aulas.length === 0" class="bg-white p-6 rounded-lg shadow flex flex-col items-center space-y-4">
-  <p class="text-gray-600 text-center">
-    <strong>Parabéns, você se inscreveu com sucesso!</strong><br>
-    Agora só precisa aguardar o início das aulas, em <strong>02/Agosto, às 15h00</strong>.<br>
-    Até breve!
-  </p>
-  <a
-    href="https://chat.whatsapp.com/GFtj5ZtDu8OEGpHRjoFv9m?mode=r_t"
-    target="_blank"
-    rel="noopener"
-    class="inline-block px-6 py-3 bg-green-600 text-white font-semibold rounded-lg shadow hover:bg-green-700 transition"
-  >
-    Entrar no grupo do WhatsApp
-  </a>
-</div>
-
+    <div v-if="aulas.length === 0" class="bg-white p-6 rounded-lg shadow">
+      <p class="text-gray-600">Ainda não há aulas disponíveis.</p>
+    </div>
 
     <div v-else class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       <div v-for="aula in [...aulas].sort((a, b) => b.numero - a.numero)" :key="aula.numero" class="space-y-2">
@@ -106,13 +93,13 @@ const reprovações = computed(() => {
 <NuxtLink
   :to="aula.linkVideo"
   class="block p-4 bg-gray-50 rounded-lg shadow-sm hover:shadow-md transition flex justify-between items-center mb-2"
-  @click="salvarStatusVisualizacao(cadastro.userId, 'video', aula._id, true)"
+  @click="salvarStatusVisualizacao(cadastro.userId, 'video', aula.id, true)"
 >
   <div class="flex items-center">
     <img src="/icons/videoIcon.png" alt="Vídeo-aula" class="w-8 h-8 mr-2" />
     <span class="text-gray-600 text-lg">Vídeo-aula</span>
   </div>
-  <span v-if="recuperarStatusVisualizacao(cadastro.userId, 'video', aula._id)" class="ml-2">
+  <span v-if="recuperarStatusVisualizacao(cadastro.userId, 'video', aula.id)" class="ml-2">
     <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
     </svg>
@@ -123,13 +110,13 @@ const reprovações = computed(() => {
 <NuxtLink
   :to="aula.linkMaterial"
   class="block p-4 bg-gray-50 rounded-lg shadow-sm hover:shadow-md transition flex justify-between items-center mb-2"
-  @click="salvarStatusVisualizacao(cadastro.userId, 'material', aula._id, true)"
+  @click="salvarStatusVisualizacao(cadastro.userId, 'material', aula.id, true)"
 >
   <div class="flex items-center">
     <img src="/icons/materialIcon.png" alt="Material" class="w-8 h-8 mr-2" />
     <span class="text-gray-600 text-lg">Material</span>
   </div>
-  <span v-if="recuperarStatusVisualizacao(cadastro.userId, 'material', aula._id)" class="ml-2">
+  <span v-if="recuperarStatusVisualizacao(cadastro.userId, 'material', aula.id)" class="ml-2">
     <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
     </svg>
@@ -151,21 +138,21 @@ const reprovações = computed(() => {
   class="text-sm font-medium px-3 py-1 rounded-full"
   :class="{
     'bg-green-100 text-green-800':
-      cadastro?.envios?.find(envio => envio.aulaId === aula._id) &&
-      cadastro.envios.find(envio => envio.aulaId === aula._id).questoes.filter(q => q.correta).length >= 2,
+      cadastro?.envios?.find(envio => envio.aulaId === aula.id) &&
+      cadastro.envios.find(envio => envio.aulaId === aula.id).questoes.filter(q => q.correta).length >= 2,
     'bg-red-100 text-red-800':
-      cadastro?.envios?.find(envio => envio.aulaId === aula._id) &&
-      cadastro.envios.find(envio => envio.aulaId === aula._id).questoes.filter(q => q.correta).length < 2,
+      cadastro?.envios?.find(envio => envio.aulaId === aula.id) &&
+      cadastro.envios.find(envio => envio.aulaId === aula.id).questoes.filter(q => q.correta).length < 2,
     'bg-blue-100 text-blue-800':
-      !cadastro?.envios?.find(envio => envio.aulaId === aula._id) &&
+      !cadastro?.envios?.find(envio => envio.aulaId === aula.id) &&
       new Date(aula.dataFechamento) > new Date(),
     'bg-gray-100 text-gray-800':
-      !cadastro?.envios?.find(envio => envio.aulaId === aula._id) &&
+      !cadastro?.envios?.find(envio => envio.aulaId === aula.id) &&
       !(new Date(aula.dataFechamento) > new Date())
   }"
 >
-  <template v-if="cadastro?.envios?.find(envio => envio.aulaId === aula._id)">
-    {{ cadastro.envios.find(envio => envio.aulaId === aula._id).questoes.filter(q => q.correta).length }}/{{ cadastro.envios.find(envio => envio.aulaId === aula._id).questoes.length }} acertos
+  <template v-if="cadastro?.envios?.find(envio => envio.aulaId === aula.id)">
+    {{ cadastro.envios.find(envio => envio.aulaId === aula.id).questoes.filter(q => q.correta).length }}/{{ cadastro.envios.find(envio => envio.aulaId === aula.id).questoes.length }} acertos
   </template>
   <template v-else>
     <template v-if="new Date(aula.dataFechamento) > new Date()">

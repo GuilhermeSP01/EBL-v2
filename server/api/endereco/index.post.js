@@ -1,30 +1,44 @@
+import { getHeader, createError } from 'h3';
 import { verifyToken } from '~/server/utils/auth';
+import { db } from '~/server/utils/firebase-admin';
 
 export default defineEventHandler(async (event) => { 
-    const token = getHeader(event, 'Authorization')?.split(' ')[1] || null;
-    if (!token) throw createError({
-        statusCode: 401,
-        statusMessage: 'Nenhum token fornecido' 
-    });
+  const token = getHeader(event, 'Authorization')?.split(' ')[1] || null;
+  if (!token) throw createError({
+    statusCode: 401,
+    statusMessage: 'Nenhum token fornecido' 
+  });
 
-    const user = await verifyToken(token);
-    if (!user) throw createError({
-        statusCode: 401,
-        statusMessage: 'Token inválido' 
-    });
+  const user = await verifyToken(token);
+  if (!user) throw createError({
+    statusCode: 401,
+    statusMessage: 'Token inválido' 
+  });
 
-    const body = await readBody(event);
+  const body = await readBody(event);
 
-    const cadastro = await Cadastro.findOneAndUpdate(
-        { email: user.email },
-        { $set: { endereco: body } },
-        { new: true }
-    );
+  // Busca o cadastro pelo email
+  const cadastroSnapshot = await db.collection('cadastros')
+    .where('email', '==', user.email)
+    .limit(1)
+    .get();
 
-    if (!cadastro) throw createError({
-        statusCode: 404,
-        statusMessage: 'Cadastro nao encontrado' 
-    });
+  if (cadastroSnapshot.empty) throw createError({
+    statusCode: 404,
+    statusMessage: 'Cadastro nao encontrado' 
+  });
 
-    return cadastro;
+  const cadastroDoc = cadastroSnapshot.docs[0];
+  const cadastroRef = db.collection('cadastros').doc(cadastroDoc.id);
+
+  // Atualiza apenas o campo "endereco" do cadastro
+  await cadastroRef.update({ endereco: body });
+
+  // Busca o documento atualizado
+  const updatedDoc = await cadastroRef.get();
+
+  return {
+    id: updatedDoc.id,
+    ...updatedDoc.data()
+  };
 });

@@ -9,7 +9,7 @@
 
   const cadastro = ref({
     nome: $auth.currentUser.displayName || '',
-    turmaId: props.turma._id,
+    turmaId: props.turma.id,
     modalidade: 'online',
     email: $auth.currentUser.email,
     telefone: '',

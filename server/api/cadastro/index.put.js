@@ -1,4 +1,5 @@
 import { verifyToken } from '~/server/utils/auth';
+import { db } from '~/server/utils/firebase-admin';
 
 export default defineEventHandler(async (event) => {
     const token = getHeader(event, 'Authorization')?.split(' ')[1] || null;
@@ -15,16 +16,22 @@ export default defineEventHandler(async (event) => {
 
     const body = await readBody(event);
 
-    const cadastro = await Cadastro.findOneAndUpdate(
-        { email: user.email },
-        { $set: body },
-        { new: true }
-    );
-
-    if (!cadastro) throw createError({
+    const cadastroSnapshot = await db.collection('cadastros')
+        .where('email', '==', user.email)
+        .limit(1)
+        .get();
+    if (cadastroSnapshot.empty) throw createError({
         statusCode: 404,
-        statusMessage: 'Cadastro nao encontrado' 
+        statusMessage: 'Aluno nao encontrado' 
     });
+    const cadastroDoc = cadastroSnapshot.docs[0];
+    const cadastroRef = db.collection('cadastros').doc(cadastroDoc.id);
 
-    return cadastro;
+    await cadastroRef.update(body);
+    const updatedDoc = await cadastroRef.get();
+
+    return {
+        id: updatedDoc.id,
+        ...updatedDoc.data()
+    };
 });

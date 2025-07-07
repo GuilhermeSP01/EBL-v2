@@ -24,8 +24,8 @@
     }
 
     const envioParaAula = computed(() => {
-        if (!cadastro.value?.envios || !aula?._id) return null;
-        return cadastro.value.envios.find(envio => envio.aulaId === aula._id);
+        if (!cadastro.value?.envios || !aula?.id) return null;
+        return cadastro.value.envios.find(envio => envio.aulaId === aula.id);
     });
 
     const respostas = ref(
@@ -44,7 +44,7 @@
                     Authorization: `Bearer ${token}`
                 },
                 body: {
-                    aulaId: aula._id,
+                    aulaId: aula.id,
                     questoes: respostas.value
                 }
             });
