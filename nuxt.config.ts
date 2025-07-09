@@ -6,23 +6,12 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-05-15',
   devtools: { enabled: true },
 
-  modules: ['nuxt-mongoose'],
-
   plugins: [{ src: '~/plugins/firebase.client.js', mode: 'client' }],
 
   css: ['~/assets/css/main.css'],
   
   vite: {
     plugins: [tailwindcss()]
-  },
-
-  mongoose: {
-    options: {
-      maxPoolSize: 5,
-      minPoolSize: 0,
-      serverSelectionTimeoutMS: 5000,
-      socketTimeoutMS: 45000,
-    }
   },
 
   runtimeConfig: {
