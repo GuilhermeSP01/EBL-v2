@@ -74,7 +74,7 @@ const reprovações = computed(() => {
       </div>
 
     
-    <div v-if="aulas.length === 0" class="bg-white p-6 rounded-lg shadow flex flex-col items-center space-y-4">
+    <div v-if="aulas.length === 0 || (aulas.length === 1 && new Date(aulas[0].dataAbertura) > new Date())" class="bg-white p-6 rounded-lg shadow flex flex-col items-center space-y-4">
   <p class="text-gray-600 text-center">
     <strong>Parabéns, você se inscreveu com sucesso!</strong><br>
     Agora só precisa aguardar o início das aulas, em <strong>02/Agosto, às 15h00</strong>.<br>
@@ -90,7 +90,7 @@ const reprovações = computed(() => {
   </a>
 </div>
 
-    <div v-else class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+    <div v-if="aulas.length > 0" class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       <div v-for="aula in [...aulas].sort((a, b) => b.numero - a.numero)" :key="aula.numero" class="space-y-2">
         <div class="bg-white p-6 rounded-lg shadow">
           <h3 class="font-semibold text-lg mb-2">
@@ -104,50 +104,66 @@ const reprovações = computed(() => {
 
 <!-- Vídeo-aula -->
 <NuxtLink
-  :to="aula.linkVideo"
-  class="block p-4 bg-gray-50 rounded-lg shadow-sm hover:shadow-md transition flex justify-between items-center mb-2"
-  @click="salvarStatusVisualizacao(cadastro.userId, 'video', aula.id, true)"
->
-  <div class="flex items-center">
-    <img src="/icons/videoIcon.png" alt="Vídeo-aula" class="w-8 h-8 mr-2" />
-    <span class="text-gray-600 text-lg">Vídeo-aula</span>
-  </div>
-  <span v-if="recuperarStatusVisualizacao(cadastro.userId, 'video', aula.id)" class="ml-2">
-    <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-    </svg>
-  </span>
-</NuxtLink>
+        :to="aula.linkVideo || ''"
+        :tabindex="aula.linkVideo ? 0 : -1"
+        :aria-disabled="!aula.linkVideo"
+        :class="[
+          'block p-4 bg-gray-50 rounded-lg shadow-sm transition flex justify-between items-center mb-2',
+          aula.linkVideo ? 'hover:shadow-md' : 'opacity-60 pointer-events-none cursor-not-allowed'
+        ]"
+        @click="aula.linkVideo && salvarStatusVisualizacao(cadastro.userId, 'video', aula.id, true)"
+      >
+        <div class="flex items-center">
+          <img src="/icons/videoIcon.png" alt="Vídeo-aula" class="w-8 h-8 mr-2" />
+          <span class="text-gray-600 text-lg">Vídeo-aula</span>
+        </div>
+        <span v-if="recuperarStatusVisualizacao(cadastro.userId, 'video', aula.id)" class="ml-2">
+          <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+        </span>
+      </NuxtLink>
 
-<!-- Material -->
+      <!-- Material -->
+      <NuxtLink
+        :to="aula.linkMaterial || ''"
+        :tabindex="aula.linkMaterial ? 0 : -1"
+        :aria-disabled="!aula.linkMaterial"
+        :class="[
+          'block p-4 bg-gray-50 rounded-lg shadow-sm transition flex justify-between items-center mb-2',
+          aula.linkMaterial ? 'hover:shadow-md' : 'opacity-60 pointer-events-none cursor-not-allowed'
+        ]"
+        @click="aula.linkMaterial && salvarStatusVisualizacao(cadastro.userId, 'material', aula.id, true)"
+      >
+        <div class="flex items-center">
+          <img src="/icons/materialIcon.png" alt="Material" class="w-8 h-8 mr-2" />
+          <span class="text-gray-600 text-lg">Material</span>
+        </div>
+        <span v-if="recuperarStatusVisualizacao(cadastro.userId, 'material', aula.id)" class="ml-2">
+          <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+        </span>
+      </NuxtLink>
+
+
+<!-- Questionário -->
 <NuxtLink
-  :to="aula.linkMaterial"
-  class="block p-4 bg-gray-50 rounded-lg shadow-sm hover:shadow-md transition flex justify-between items-center mb-2"
-  @click="salvarStatusVisualizacao(cadastro.userId, 'material', aula.id, true)"
+  :to="aula.questoes && aula.questoes.length > 0 && new Date(aula.dataFechamento) > new Date() ? `/atividade/${aula.numero}` : ''"
+  :tabindex="aula.questoes && aula.questoes.length > 0 && new Date(aula.dataFechamento) > new Date() ? 0 : -1"
+  :aria-disabled="!(aula.questoes && aula.questoes.length > 0 && new Date(aula.dataFechamento) > new Date())"
+  :class="[
+    'block p-4 bg-gray-50 rounded-lg shadow-sm transition flex justify-between items-center',
+    aula.questoes && aula.questoes.length > 0 && new Date(aula.dataFechamento) > new Date()
+      ? 'hover:shadow-md'
+      : 'opacity-60 pointer-events-none cursor-not-allowed'
+  ]"
 >
   <div class="flex items-center">
-    <img src="/icons/materialIcon.png" alt="Material" class="w-8 h-8 mr-2" />
-    <span class="text-gray-600 text-lg">Material</span>
+    <img src="/icons/formIcon.png" alt="Questionário" class="w-8 h-8 mr-2" />
+    <span class="text-gray-600 text-lg">Questionário</span>
   </div>
-  <span v-if="recuperarStatusVisualizacao(cadastro.userId, 'material', aula.id)" class="ml-2">
-    <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-    </svg>
-  </span>
-</NuxtLink>
-
-
-
-          <!-- Questionário -->
-          <NuxtLink
-            :to="`/atividade/${aula.numero}`"
-            class="block p-4 bg-gray-50 rounded-lg shadow-sm hover:shadow-md transition flex justify-between items-center"
-          >
-            <div class="flex items-center">
-              <img src="/icons/formIcon.png" alt="Questionário" class="w-8 h-8 mr-2" />
-              <span class="text-gray-600 text-lg">Questionário</span>
-            </div>
-            <span
+  <span
   class="text-sm font-medium px-3 py-1 rounded-full"
   :class="{
     'bg-green-100 text-green-800':
@@ -158,17 +174,25 @@ const reprovações = computed(() => {
       cadastro.envios.find(envio => envio.aulaId === aula.id).questoes.filter(q => q.correta).length < 2,
     'bg-blue-100 text-blue-800':
       !cadastro?.envios?.find(envio => envio.aulaId === aula.id) &&
-      new Date(aula.dataFechamento) > new Date(),
+      new Date(aula.dataAbertura) <= new Date() && new Date(aula.dataFechamento) > new Date(),
     'bg-gray-100 text-gray-800':
       !cadastro?.envios?.find(envio => envio.aulaId === aula.id) &&
-      !(new Date(aula.dataFechamento) > new Date())
+      (new Date(aula.dataAbertura) > new Date() || new Date(aula.dataFechamento) <= new Date())
   }"
 >
   <template v-if="cadastro?.envios?.find(envio => envio.aulaId === aula.id)">
-    {{ cadastro.envios.find(envio => envio.aulaId === aula.id).questoes.filter(q => q.correta).length }}/{{ cadastro.envios.find(envio => envio.aulaId === aula.id).questoes.length }} acertos
+    {{
+      cadastro.envios.find(envio => envio.aulaId === aula.id).questoes.filter(q => q.correta).length
+    }}/
+    {{
+      cadastro.envios.find(envio => envio.aulaId === aula.id).questoes.length
+    }} acertos
   </template>
   <template v-else>
-    <template v-if="new Date(aula.dataFechamento) > new Date()">
+    <template v-if="new Date(aula.dataAbertura) > new Date()">
+      Em breve
+    </template>
+    <template v-else-if="new Date(aula.dataFechamento) > new Date()">
       Aberto
     </template>
     <template v-else>
@@ -177,7 +201,8 @@ const reprovações = computed(() => {
   </template>
 </span>
 
-          </NuxtLink>
+</NuxtLink>
+
         </div>
       </div>
     </div>

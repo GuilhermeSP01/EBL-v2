@@ -34,6 +34,7 @@ export default defineEventHandler(async (event) => {
         return {
             id: doc.id,
             ...aula,
+            permitirPrevia: aula.permitirPrevia,
             dataAbertura: aula.dataAbertura?.toDate ? aula.dataAbertura.toDate().toISOString() : aula.dataAbertura,
             dataFechamento: aula.dataFechamento?.toDate ? aula.dataFechamento.toDate().toISOString() : aula.dataFechamento,
             questoes: (aula.questoes || []).map(questao => {
