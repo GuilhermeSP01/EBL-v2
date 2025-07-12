@@ -41,6 +41,9 @@ export default defineEventHandler(async (event) => {
                 return rest;
             })
         };
+    }).filter(aula => {
+        const dataAberturaDate = aula.dataAbertura ? new Date(aula.dataAbertura) : null;
+        return (aula.permitirPrevia === true) || (dataAberturaDate && dataAberturaDate <= new Date());
     });
 
     return aulasSemResposta;
