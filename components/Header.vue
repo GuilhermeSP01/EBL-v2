@@ -1,6 +1,7 @@
 <script setup>
   const navItems = [
     { name: 'Fale conosco', link: 'https://wa.me/5513988542892' },
+    { name: 'Anúncios', link: 'https://chat.whatsapp.com/GFtj5ZtDu8OEGpHRjoFv9m?mode=r_t' },
     { name: 'Aulas', link: '/aulas' },
     { name: 'Perfil', link: '/perfil' }
   ];
@@ -40,7 +41,7 @@
       <!-- Menu Desktop -->
       <ul
         :class="[
-          'md:flex gap-6',
+          'md:flex gap-8',
           isMenuOpen
             ? 'flex flex-col gap-2 absolute top-[4.5rem] left-0 w-full bg-[#00105C] px-6 py-4 z-50'
             : 'hidden'
