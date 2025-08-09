@@ -90,9 +90,9 @@ const reprovações = computed(() => {
   </a>
 </div>
 
-    <div v-if="aulas.length > 0" class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+    <div v-if="aulas.length > 0" class="grid gap-4 md:grid-cols-2 lg:grid-cols-3 items-stretch">
       <div v-for="aula in [...aulas].sort((a, b) => b.numero - a.numero)" :key="aula.numero" class="space-y-2">
-        <div class="bg-white p-6 rounded-lg shadow">
+        <div v-if="aula.tipo === 'principal'" class="bg-white p-6 rounded-lg shadow md:h-full md:flex md:flex-col">
           <h3 class="font-semibold text-lg mb-2">
             <span class="font-bold text-xl">Aula {{ aula.numero < 10 ? `0${aula.numero}` : aula.numero.toString() }}</span>
             <span class="text-gray-600"> | {{ aula.titulo }}</span>
@@ -204,6 +204,30 @@ const reprovações = computed(() => {
 </NuxtLink>
 
         </div>
+        <div v-else-if="aula.tipo === 'complementar'" class="bg-white p-6 rounded-lg shadow md:h-full md:min-h-[320px] md:flex md:flex-col">
+    <h3 class="font-semibold text-lg mb-2">
+      <span class="font-bold text-xl">Complementar</span>
+      <span class="text-gray-600"> | {{ aula.titulo }}</span>
+    </h3>
+    <p class="text-sm text-gray-500 mb-4">
+      Data: {{ formatarData(aula.data) }}<br>
+      Professor: {{ aula.professor }}
+    </p>
+    <NuxtLink
+      :to="aula.linkVideo || ''"
+      :tabindex="aula.linkVideo ? 0 : -1"
+      :aria-disabled="!aula.linkVideo"
+      :class="[
+        'block p-4 bg-gray-50 rounded-lg shadow-sm transition flex justify-between items-center',
+        aula.linkVideo ? 'hover:shadow-md' : 'opacity-60 pointer-events-none cursor-not-allowed'
+      ]"
+    >
+      <div class="flex items-center">
+        <img src="/icons/videoIcon.png" alt="Vídeo-aula" class="w-8 h-8 mr-2" />
+        <span class="text-gray-600 text-lg">Vídeo-aula</span>
+      </div>
+    </NuxtLink>
+  </div>
       </div>
     </div>
   </section>
