@@ -91,7 +91,8 @@ const reprovações = computed(() => {
 </div>
 
     <div v-if="aulas.length > 0" class="grid gap-4 md:grid-cols-2 lg:grid-cols-3 items-stretch">
-      <div v-for="aula in [...aulas].sort((a, b) => b.numero - a.numero)" :key="aula.numero" class="space-y-2">
+      <!-- <div v-for="aula in [...aulas].sort((a, b) => b.numero - a.numero)" :key="aula.numero" class="space-y-2"> -->
+      <div v-for="aula in aulas" :key="aula.numero" class="space-y-2"></div>
         <div v-if="aula.tipo === 'principal'" class="bg-white p-6 rounded-lg shadow md:h-full md:flex md:flex-col">
           <h3 class="font-semibold text-lg mb-2">
             <span class="font-bold text-xl">Aula {{ aula.numero < 10 ? `0${aula.numero}` : aula.numero.toString() }}</span>
