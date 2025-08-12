@@ -1,75 +1,105 @@
 <script setup>
-    definePageMeta({ middleware: ['auth', 'cadastro'] });
-    import { getToken } from '~/composables/useCadastro';
-    const { isAuthLoading } = useAuth();
-    const { aulas } = useAulas();
-    const { cadastro, save } = useCadastro();
-    const route = useRoute();
-    const aula = aulas.value.find(a => a.numero === Number(route.params.id));
+definePageMeta({ middleware: ['auth', 'cadastro'] });
 
-    if (!aula) {
-        navigateTo('/aulas');
-    }
+import { getToken } from '~/composables/useCadastro';
+const { isAuthLoading } = useAuth();
+const { aulas } = useAulas();
+const { cadastro, save } = useCadastro();
+const route = useRoute();
 
-    const questionarioAberto = ref(true);
-    const questionarioMensagem = ref('');
+const aula = aulas.value.find(a => a.numero === Number(route.params.id));
+if (!aula) navigateTo('/aulas');
 
-    if (new Date(aula.dataAbertura) > Date.now()) {
-        questionarioAberto.value = false;
-        questionarioMensagem.value = 'Esta aula ainda não está disponível.';
-    }
-    if (new Date(aula.dataFechamento) < Date.now()) {
-        questionarioAberto.value = false;
-        questionarioMensagem.value = 'O prazo de envio do questionário expirou.';
-    }
+// Estados de controle
+const questionarioAberto = ref(true);
+const questionarioMensagem = ref('');
+const isSending = ref(false);
 
-    const envioParaAula = computed(() => {
-        if (!cadastro.value?.envios || !aula?.id) return null;
-        return cadastro.value.envios.find(envio => envio.aulaId === aula.id);
+// Toast
+const toastMessage = ref('');
+const toastType = ref('success'); // 'success' | 'error'
+
+// Função para exibir toast
+function showToast(message, type = 'success') {
+  toastMessage.value = message;
+  toastType.value = type;
+  setTimeout(() => {
+    toastMessage.value = '';
+  }, 4000);
+}
+
+// Verifica se o questionário ainda está aberto
+if (new Date(aula.dataAbertura) > Date.now()) {
+  questionarioAberto.value = false;
+  questionarioMensagem.value = 'Esta aula ainda não está disponível.';
+}
+if (new Date(aula.dataFechamento) < Date.now()) {
+  questionarioAberto.value = false;
+  questionarioMensagem.value = 'O prazo de envio do questionário expirou.';
+}
+
+const envioParaAula = computed(() => {
+  if (!cadastro.value?.envios || !aula?.id) return null;
+  return cadastro.value.envios.find(envio => envio.aulaId === aula.id);
+});
+
+// Respostas do formulário
+const respostas = ref(
+  aula.questoes?.map(questao => ({
+    numero: questao.numero,
+    resposta: null
+  })) || []
+);
+
+async function enviarQuestionario() {
+  isSending.value = true;
+  const token = await getToken();
+  
+  try {
+    const response = await $fetch('/api/envio', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: { aulaId: aula.id, questoes: respostas.value }
     });
+    save(response);
+    showToast('Envio realizado com sucesso! 🎉', 'success');
+  } catch (e) {
+    showToast('Erro ao enviar questionário: ' + e.message, 'error');
+  } finally {
+    isSending.value = false;
+  }
+}
 
-    const respostas = ref(
-        aula.questoes?.map(questao => ({
-            numero: questao.numero,
-            resposta: null
-        })) || []
-    );
+function respostaQuestao(numeroQuestao) {
+  const questaoEnvio = envioParaAula.value?.questoes?.find(q => q.numero === numeroQuestao);
+  return questaoEnvio?.resposta;
+}
 
-    async function enviarQuestionario() {
-        const token = await getToken();
-        try {
-            const response = await $fetch('/api/envio', {
-                method: 'POST',
-                headers: {
-                    Authorization: `Bearer ${token}`
-                },
-                body: {
-                    aulaId: aula.id,
-                    questoes: respostas.value
-                }
-            });
-            save(response);
-            alert('Envio realizado com sucesso!');
-        } catch (e) {
-            alert('Ocorreu um erro ao enviar o questionário: ' + e.message);
-        }
-    }
-
-    function respostaQuestao(numeroQuestao) {
-        const questaoEnvio = envioParaAula.value?.questoes?.find(q => q.numero === numeroQuestao);
-        return questaoEnvio?.resposta;
-    }
-
-    function questaoCorreta(numeroQuestao) {
-        const questaoEnvio = envioParaAula.value?.questoes?.find(q => q.numero === numeroQuestao);
-        return questaoEnvio?.correta;
-    }
+function questaoCorreta(numeroQuestao) {
+  const questaoEnvio = envioParaAula.value?.questoes?.find(q => q.numero === numeroQuestao);
+  return questaoEnvio?.correta;
+}
 </script>
 
 <template>
-    <Header v-if="!isAuthLoading" />
+  <Header v-if="!isAuthLoading" />
   <Loading v-if="isAuthLoading" />
+
   <div v-else class="space-y-8 px-6 py-8">
+    
+    <!-- Toast Notification -->
+    <transition name="fade">
+      <div
+        v-if="toastMessage"
+        :class="[
+          'fixed top-4 right-4 p-4 rounded-lg shadow-lg text-white',
+          toastType === 'success' ? 'bg-green-600' : 'bg-red-600'
+        ]"
+      >
+        {{ toastMessage }}
+      </div>
+    </transition>
+
     <section class="space-y-4 max-w-4xl mx-auto">
       <div class="bg-white p-6 rounded-lg shadow">
         <h1 class="text-2xl font-semibold">Atividade {{ aula.numero }} - {{ aula.titulo }}</h1>
@@ -86,7 +116,7 @@
           </NuxtLink>
         </p>
 
-        <!-- Se já houve envio, exibe as respostas -->
+        <!-- Se já houve envio -->
         <div v-if="envioParaAula" class="mt-6 space-y-6">
           <p class="text-sm text-gray-500">
             <strong>Seu questionário já foi enviado.</strong> Data do envio: {{ new Date(envioParaAula.dataEnvio).toLocaleDateString('pt-BR') }}
@@ -103,9 +133,7 @@
                 }"
               >
                 {{
-                  questao.alternativas.find(a =>
-                    a.numero === respostaQuestao(questao.numero)
-                  )?.descricao || 'Não respondida'
+                  questao.alternativas.find(a => a.numero === respostaQuestao(questao.numero))?.descricao || 'Não respondida'
                 }}
               </strong>
               <span v-if="questaoCorreta(questao.numero)"> ✅</span>
@@ -113,8 +141,8 @@
             </p>
           </div>
         </div>
-        
-        <!-- Se não houve envio, exibe o formulário -->
+
+        <!-- Se não houve envio -->
         <div v-else>
           <div v-if="questionarioAberto" class="mt-6 space-y-6">
             <div v-for="(questao, index) in aula.questoes" :key="questao.numero" class="space-y-2">
@@ -137,11 +165,14 @@
                 </label>
               </div>
             </div>
+
             <button
               @click="enviarQuestionario"
-              class="w-full sm:w-auto bg-yellow-400 hover:bg-yellow-500 text-gray-800 font-semibold px-6 py-2 rounded-lg transition-colors"
+              :disabled="isSending"
+              class="w-full sm:w-auto bg-yellow-400 hover:bg-yellow-500 disabled:opacity-50 disabled:cursor-not-allowed text-gray-800 font-semibold px-6 py-2 rounded-lg transition-colors"
             >
-              Enviar questionário
+              <span v-if="!isSending">Enviar questionário</span>
+              <span v-else>Enviando...</span>
             </button>
           </div>
           <div v-else class="mt-6">
@@ -152,3 +183,12 @@
     </section>
   </div>
 </template>
+
+<style>
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.4s;
+}
+.fade-enter-from, .fade-leave-to {
+  opacity: 0;
+}
+</style>
