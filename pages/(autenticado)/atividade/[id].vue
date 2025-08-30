@@ -3,8 +3,8 @@ definePageMeta({ middleware: ['auth', 'cadastro'] });
 
 import { getToken } from '~/composables/useCadastro';
 const { isAuthLoading } = useAuth();
-const { aulas } = useAulas();
-const { cadastro, save } = useCadastro();
+const { aulas, loadAulas } = useAulas();
+const { cadastro, save, load } = useCadastro();
 const route = useRoute();
 
 const aula = aulas.value.find(a => a.numero === Number(route.params.id));
@@ -62,6 +62,10 @@ async function enviarQuestionario() {
       body: { aulaId: aula.id, questoes: respostas.value }
     });
     save(response);
+
+    await load();
+    await loadAulas();
+
     showToast('Envio realizado com sucesso! 🎉', 'success');
   } catch (e) {
     showToast('Erro ao enviar questionário: ' + e.message, 'error');

@@ -22,7 +22,7 @@ export default defineEventHandler(async (event) => {
   const cadastroDoc = cadastroSnapshot.docs[0];
   const cadastro = { id: cadastroDoc.id, ...cadastroDoc.data() };
 
-  // Busca a aula
+  // Busca a aula atual
   const aulaDoc = await db.collection('aulas').doc(body.aulaId).get();
   if (!aulaDoc.exists) throw createError({ statusCode: 404, statusMessage: 'Aula não encontrada' });
   const aula = aulaDoc.data();
@@ -71,18 +71,41 @@ export default defineEventHandler(async (event) => {
 
   const envios = enviosSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-  // Monta mapa de respostas corretas
-  const respostasCorretas = {};
-  (aula.questoes || []).forEach(q => {
-    respostasCorretas[q.numero] = q.resposta;
+  // Busca todas as aulas da turma para mapear respostas corretas por aula
+  const aulasSnapshot = await db.collection('aulas')
+    .where('turmaId', '==', cadastro.turmaId)
+    .get();
+
+  const aulas = aulasSnapshot.docs.map(doc => {
+    const aulaData = doc.data();
+    return {
+      id: doc.id,
+      questoes: aulaData.questoes || []
+    };
   });
 
-  // Corrige cada envio
+  // Cria mapa rápido de aulas por id
+  const aulasMap = {};
+  aulas.forEach(a => {
+    aulasMap[a.id] = a;
+  });
+
+  // Corrige cada envio com o gabarito apropriado
   const enviosComCorrecao = envios.map(envio => {
+    const aulaAtual = aulasMap[envio.aulaId];
+    if (!aulaAtual) return envio;
+
+    // Monta mapa de respostas corretas da aula
+    const respostasCorretas = {};
+    aulaAtual.questoes.forEach(q => {
+      respostasCorretas[q.numero] = q.resposta;
+    });
+
     const questoesCorrigidas = (envio.questoes || []).map(questao => ({
       ...questao,
       correta: questao.resposta === respostasCorretas[questao.numero]
     }));
+
     return {
       ...envio,
       dataEnvio: envio.dataEnvio?.toDate ? envio.dataEnvio.toDate().toISOString() : envio.dataEnvio,
@@ -90,6 +113,7 @@ export default defineEventHandler(async (event) => {
     };
   });
 
+  // Retorna cadastro atualizado com todos os envios corrigidos
   return {
     ...cadastro,
     envios: enviosComCorrecao

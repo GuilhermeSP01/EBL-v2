@@ -2,9 +2,10 @@
   definePageMeta({ middleware: ['auth', 'cadastro'] });
   const { isAuthLoading } = useAuth();
   const { aulas, loadAulas } = useAulas();
-  const { cadastro } = useCadastro();
+  const { cadastro, load } = useCadastro();
 
-  onMounted(() => {
+  onMounted(async () => {
+    await load();
     loadAulas();
   });
 
