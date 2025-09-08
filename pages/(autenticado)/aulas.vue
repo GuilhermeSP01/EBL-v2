@@ -28,24 +28,27 @@
   };
 
 const aprovações = computed(() => {
-  if (!cadastro || !cadastro.envios) return 0;
+  if (!cadastro.value || !cadastro.value.envios) return 0;
   return aulas.value.filter(aula => {
-    const envio = cadastro.envios.find(envio => envio.aulaId === aula.id);
-    return envio && envio.questoes.filter(q => q.correta).length >= 2;
+    const envio = cadastro.value.envios.find(envio => envio.aulaId === aula.id);
+    return envio && Array.isArray(envio.questoes) && envio.questoes.filter(q => q.correta === true).length >= 2;
   }).length;
 });
 
 const reprovações = computed(() => {
-  if (!cadastro || !cadastro.envios) return 0;
+  if (!cadastro.value || !cadastro.value.envios) return 0;
   return aulas.value.filter(aula => {
     const envio = cadastro.value.envios.find(envio => envio.aulaId === aula.id);
-    if (envio) {
-      return envio.questoes.filter(q => q.correta).length < 2;
+    if (envio && Array.isArray(envio.questoes)) {
+      // Reprovado: respondeu menos de 2 corretas
+      return envio.questoes.filter(q => q.correta === true).length < 2;
     } else {
-      return !(new Date(aula.dataFechamento) > new Date());
+      // Não enviou e já fechou: conta como reprovação
+      return new Date(aula.dataFechamento) <= new Date();
     }
   }).length;
 });
+
 
 
 </script>
