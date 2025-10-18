@@ -12,26 +12,44 @@
   const telefoneFormatado = ref('');
   const isLoading = ref(false);
 
+  // CEP formatado para modal de endereço
+  const cepFormatado = ref('');
+
   function formatarTelefone(value) {
-    let digits = value.replace(/\D/g, '');
-    digits = digits.substring(0, 11);
+    let digits = value.replace(/\D/g, '').substring(0, 11);
     if (digits.length >= 2) digits = `(${digits.substring(0, 2)}) ${digits.substring(2)}`;
     if (digits.length > 9) digits = `${digits.substring(0, 10)}-${digits.substring(10)}`;
     return digits;
   }
 
-  const onInputTelefone = (event) => {
-    let value = event.target.value.replace(/\D/g, ''); // Remove não dígitos
-    if (value.length > 11) {
-      value = value.slice(0, 11);
-    }
+  function onInputTelefone(event) {
+    let value = event.target.value.replace(/\D/g, '');
+    if (value.length > 11) value = value.slice(0, 11);
     form.value.telefone = value;
     telefoneFormatado.value = formatarTelefone(value);
     event.target.value = telefoneFormatado.value;
-  };
+  }
 
   watch(() => form.value.telefone, (newValue) => {
-    telefoneFormatado.value = formatarTelefone(newValue);
+    telefoneFormatado.value = formatarTelefone(newValue || '');
+  });
+
+  function formatarCEP(value) {
+    let digits = value.replace(/\D/g, '').substring(0, 8);
+    if (digits.length > 5) digits = `${digits.substring(0, 5)}-${digits.substring(5)}`;
+    return digits;
+  }
+
+  function onInputCEP(event) {
+    let value = event.target.value.replace(/\D/g, '');
+    if (value.length > 8) value = value.slice(0, 8);
+    formEndereco.value.cep = value;
+    cepFormatado.value = formatarCEP(value);
+    event.target.value = cepFormatado.value;
+  }
+
+  watch(() => formEndereco.value.cep, (newValue) => {
+    cepFormatado.value = formatarCEP(newValue || '');
   });
 
   watch(editando, (val) => {
@@ -39,38 +57,70 @@
   });
 
   watch(editandoEndereco, (val) => {
-    if (val) formEndereco.value = { ...cadastro.value.endereco };
+    if (val) {
+      formEndereco.value = { ...cadastro.value.endereco };
+      cepFormatado.value = formatarCEP(formEndereco.value.cep || '');
+    }
   });
 
   async function salvarPerfil() {
-  if (isLoading.value) return;
-  isLoading.value = true;
-  error.value = null;
+    if (isLoading.value) return;
+    isLoading.value = true;
+    error.value = null;
 
-  if (form.value.telefone?.length !== 11) {
-    error.value = 'Informe um número de telefone válido';
-    isLoading.value = false;
-    return;
+    if (!form.value.telefone || form.value.telefone.length !== 11) {
+      error.value = 'Informe um número de telefone válido (11 dígitos)';
+      isLoading.value = false;
+      return;
+    }
+
+    try {
+      const token = await getToken();
+      const response = await $fetch('/api/cadastro', {
+        method: 'PUT',
+        headers: { Authorization: `Bearer ${token}` },
+        body: form.value
+      });
+      save(response);
+      editando.value = false;
+    } catch (e) {
+      error.value = e.message || 'Ocorreu um erro ao salvar o perfil';
+    } finally {
+      isLoading.value = false;
+    }
   }
-
-  try {
-    const token = await getToken();
-    const response = await $fetch('/api/cadastro', {
-      method: 'PUT',
-      headers: { Authorization: `Bearer ${token}` },
-      body: form.value
-    });
-    save(response);
-    editando.value = false;
-  } catch (e) {
-    error.value = e.message || 'Ocorreu um erro ao salvar o perfil';
-  } finally {
-    isLoading.value = false;
-  }
-}
-
 
   async function salvarEndereco() {
+    // Validações
+    if (!formEndereco.value.cep || formEndereco.value.cep.length !== 8) {
+      alert('Informe um CEP válido (8 dígitos)');
+      return;
+    }
+    if (!formEndereco.value.estado || formEndereco.value.estado.length < 2) {
+      alert('Informe o estado corretamente');
+      return;
+    }
+    if (!formEndereco.value.cidade) {
+      alert('Informe a cidade');
+      return;
+    }
+    if (!formEndereco.value.bairro) {
+      alert('Informe o bairro');
+      return;
+    }
+    if (!formEndereco.value.tipoLogradouro) {
+      alert('Informe o tipo de logradouro');
+      return;
+    }
+    if (!formEndereco.value.logradouro) {
+      alert('Informe o logradouro');
+      return;
+    }
+    if (!formEndereco.value.numero || isNaN(formEndereco.value.numero)) {
+      alert('Informe o número corretamente');
+      return;
+    }
+
     try {
       const token = await getToken();
       const response = await $fetch('/api/endereco', {
@@ -135,7 +185,7 @@
           </button>
           <button
             @click="editandoEndereco = true"
-            class="hidden bg-yellow-400 hover:bg-yellow-500 text-gray-800 font-semibold px-4 py-2 rounded-lg transition-colors"
+            class="bg-yellow-400 hover:bg-yellow-500 text-gray-800 font-semibold px-4 py-2 rounded-lg transition-colors"
           >
             Editar endereço
           </button>
@@ -159,6 +209,7 @@
             <input
               v-model="form.nome"
               required
+              minlength="3"
               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
             />
           </div>
@@ -169,6 +220,8 @@
               v-model="telefoneFormatado"
               @input="onInputTelefone"
               required
+              maxlength="15"
+              pattern="^\(\d{2}\) \d{5}-\d{4}$"
               placeholder="(00) 00000-0000"
               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
             />
@@ -212,8 +265,12 @@
           <div class="space-y-1">
             <label class="block font-medium">CEP</label>
             <input
-              v-model="formEndereco.cep"
+              v-model="cepFormatado"
+              @input="onInputCEP"
+              maxlength="9"
               required
+              pattern="^\d{5}-?\d{3}$"
+              placeholder="00000-000"
               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
             />
           </div>
@@ -221,8 +278,10 @@
             <label class="block font-medium">Estado</label>
             <input
               v-model="formEndereco.estado"
+              maxlength="2"
               required
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              placeholder="UF"
+              class="w-full uppercase px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
             />
           </div>
           <div class="space-y-1">
@@ -262,6 +321,7 @@
             <input
               v-model="formEndereco.numero"
               type="number"
+              min="1"
               required
               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
             />
